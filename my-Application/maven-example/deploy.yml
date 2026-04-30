@@ -1,12 +1,25 @@
 ---
 - name: Deploy Maven Artifact
   hosts: web
-  become: yes
+  become: false
+  gather_facts: false
 
   tasks:
-   - name: Copy JAR file
-     copy:
-      src: /var/lib/jenkins/workspace/program8/maven-example/target/maven-example-1.0-SNAPSHOT.jar
-      dest: /opt/maven-example-1.0-SNAPSHOT.jar
-   - name: Run application
-      shell: nohup java -jar /opt/maven-example-1.0-SNAPSHOT.jar &
+    - name: Ensure app directory exists
+      file:
+        path: /var/lib/jenkins/apps/myapp
+        state: directory
+        owner: jenkins
+        group: jenkins
+        mode: '0755'
+
+    - name: Copy JAR file
+      copy:
+        src: /var/lib/jenkins/workspace/prg8/my-Application/maven-example/target/maven-example-1.0-SNAPSHOT.jar
+        dest: /var/lib/jenkins/apps/myapp/maven-example.jar
+        remote_src: yes
+
+    - name: Run application
+      shell: nohup java -jar maven-example.jar &
+      args:
+        chdir: /var/lib/jenkins/apps/myapp
